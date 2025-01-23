@@ -1,0 +1,62 @@
+#include <Adafruit_LiquidCrystal.h>
+
+#define PASSWORD "Hello"
+#define MAX_TRIES 5
+#define WAIT_TIME 4500 // 1 minute in milliseconds
+#define LED_PIN 13
+
+int seconds = 0;
+int tries = 0;
+
+Adafruit_LiquidCrystal lcd_1(0);
+
+void setup()
+{
+  Serial.begin(9600);
+  pinMode(LED_PIN, OUTPUT);
+  lcd_1.begin(16, 2);
+  lcd_1.print("Enter Password:");
+}
+
+void loop()
+{
+  if (tries < MAX_TRIES)
+  {
+    if (Serial.available() > 0)
+    {
+      String input = Serial.readString();
+      input.trim(); // Remove leading/trailing whitespace
+
+      if (input.equals(PASSWORD))
+      {
+        lcd_1.clear();
+        lcd_1.print("password correct");
+        delay(1000);
+        lcd_1.clear();
+        lcd_1.print("IT Is Connected");
+        digitalWrite(LED_PIN, HIGH); // Turn on LED
+        delay(1000);
+        
+      }
+      else
+      {
+        tries++;
+        lcd_1.clear();
+        lcd_1.print("Invalid Password");
+        lcd_1.setCursor(0, 1);
+        lcd_1.print("Tries: ");
+        lcd_1.print(tries);
+        if (tries >= MAX_TRIES)
+        {
+          lcd_1.setCursor(0, 1);
+          lcd_1.print("Try again in 45 sec");
+          digitalWrite(LED_PIN, LOW); // Turn off LED
+          delay(WAIT_TIME);
+          tries = 0;
+          lcd_1.clear();
+          lcd_1.print("Enter Password:");
+        }
+      }
+    }
+  }
+}
